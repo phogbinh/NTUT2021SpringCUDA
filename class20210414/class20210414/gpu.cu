@@ -3,6 +3,9 @@
 #include "cuda_runtime.h"
 #include "device_launch_parameters.h"
 
+#define BLOCKS_N 16
+#define BLOCK_THREADS_N 64
+
 #ifdef PARALLEL
 __global__ void ProcessDataKernel(const uchar* const d_pFlowerData,
                                   const uchar* const d_pCarData,
@@ -60,7 +63,7 @@ int main()
     cudaMemcpy(d_pCarData,    pCarData,    DATA_SIZE * sizeof(uchar), cudaMemcpyHostToDevice);
 
     // CUDA process data
-    ProcessDataKernel<<<16, 64>>>(d_pFlowerData, d_pCarData, HEIGHT, WIDTH, CHANNELS_N, d_pData);
+    ProcessDataKernel<<<BLOCKS_N, BLOCK_THREADS_N>>>(d_pFlowerData, d_pCarData, HEIGHT, WIDTH, CHANNELS_N, d_pData);
 
     // CUDA write result onto flower image
     cudaMemcpy(pFlowerData, d_pData, DATA_SIZE * sizeof(uchar), cudaMemcpyDeviceToHost);
