@@ -3,7 +3,7 @@
 #include "cuda_runtime.h"
 #include "device_launch_parameters.h"
 
-#define BLOCKS_N 16
+#define BLOCKS_N 32
 #define BLOCK_THREADS_N 64
 
 #ifdef PARALLEL
