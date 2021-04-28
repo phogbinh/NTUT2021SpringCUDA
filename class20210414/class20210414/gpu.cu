@@ -2,7 +2,6 @@
 #include <opencv2/opencv.hpp>
 #include "cuda_runtime.h"
 #include "device_launch_parameters.h"
-#include <chrono>
 
 #ifdef PARALLEL
 __global__ void ProcessDataKernel(const uchar* const d_pFlowerData,
@@ -41,7 +40,13 @@ int main()
     uchar* const pFlowerData = (uchar*)kFlower.data;
     const uchar* const pCarData = (uchar*)kCar.data;
 
-    std::chrono::steady_clock::time_point kBegin = std::chrono::steady_clock::now();
+    // start time recorder
+    cudaEvent_t kStart;
+    cudaEvent_t kStop;
+    cudaEventCreate(&kStart);
+    cudaEventCreate(&kStop);
+    cudaEventRecord(kStart, 0);
+
     // CUDA prepare [d]evice data
     uchar* d_pFlowerData;
     uchar* d_pCarData;
@@ -64,8 +69,15 @@ int main()
     cudaFree(d_pFlowerData);
     cudaFree(d_pCarData);
     cudaFree(d_pData);
-    std::chrono::steady_clock::time_point kEnd = std::chrono::steady_clock::now();
-    printf("Process data took me %ld nanoseconds.\n", std::chrono::duration_cast<std::chrono::nanoseconds>(kEnd - kBegin).count());
+
+    // stop time recorder
+    cudaEventRecord(kStop, 0);
+    cudaEventSynchronize(kStop);
+    float fTimeMs = 0.f;
+    cudaEventElapsedTime(&fTimeMs, kStart, kStop);
+    cudaEventDestroy(kStart);
+    cudaEventDestroy(kStop);
+    printf("Process data took me %f milliseconds.\n", fTimeMs);
 
     // show image
     cv::imshow("Class 20210414", kFlower);
