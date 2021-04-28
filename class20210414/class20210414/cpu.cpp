@@ -23,6 +23,8 @@ int main()
     cudaEventCreate(&kStart);
     cudaEventCreate(&kStop);
     cudaEventRecord(kStart, 0);
+    float* d_pTimeDump;
+    cudaMalloc((void**)&d_pTimeDump, sizeof(float));
 
     // process data
     uchar* const pData = (uchar*)malloc(DATA_SIZE * sizeof(uchar));
@@ -45,6 +47,7 @@ int main()
     free(pData);
 
     // stop time recorder
+    cudaFree(d_pTimeDump);
     cudaEventRecord(kStop, 0);
     cudaEventSynchronize(kStop);
     float fTimeMs = 0.f;
