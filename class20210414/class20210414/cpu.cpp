@@ -1,6 +1,6 @@
 #include "option.h"
 #include <opencv2/opencv.hpp>
-#include <chrono>
+#include "cuda_runtime.h"
 
 #ifndef PARALLEL
 int main()
@@ -17,7 +17,13 @@ int main()
     uchar* const pFlowerData = (uchar*)kFlower.data;
     const uchar* const pCarData = (uchar*)kCar.data;
 
-    std::chrono::steady_clock::time_point kBegin = std::chrono::steady_clock::now();
+    // start time recorder
+    cudaEvent_t kStart;
+    cudaEvent_t kStop;
+    cudaEventCreate(&kStart);
+    cudaEventCreate(&kStop);
+    cudaEventRecord(kStart, 0);
+
     // process data
     uchar* const pData = (uchar*)malloc(DATA_SIZE * sizeof(uchar));
     for (int i = 0; i < HEIGHT; ++i)
@@ -37,8 +43,15 @@ int main()
 
     // free data
     free(pData);
-    std::chrono::steady_clock::time_point kEnd = std::chrono::steady_clock::now();
-    printf("Process data took me %ld nanoseconds.\n", std::chrono::duration_cast<std::chrono::nanoseconds>(kEnd - kBegin).count());
+
+    // stop time recorder
+    cudaEventRecord(kStop, 0);
+    cudaEventSynchronize(kStop);
+    float fTimeMs = 0.f;
+    cudaEventElapsedTime(&fTimeMs, kStart, kStop);
+    cudaEventDestroy(kStart);
+    cudaEventDestroy(kStop);
+    printf("Process data took me %f milliseconds.\n", fTimeMs);
 
     // show image
     cv::imshow("Class 20210414", kFlower);
