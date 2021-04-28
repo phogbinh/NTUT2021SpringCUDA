@@ -3,10 +3,10 @@
 #include "cuda_runtime.h"
 #include "device_launch_parameters.h"
 
+#ifdef PARALLEL
 #define BLOCKS_N 32
 #define BLOCK_THREADS_N 64
 
-#ifdef PARALLEL
 __global__ void ProcessDataKernel(const uchar* const d_pFlowerData,
                                   const uchar* const d_pCarData,
                                   const int HEIGHT,
