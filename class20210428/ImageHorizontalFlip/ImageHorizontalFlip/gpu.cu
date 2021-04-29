@@ -26,7 +26,6 @@ __global__ void GetHorizontallyFlippedFrameKernel(uchar* const d_pOriginalFrame,
     }
 }
 
-
 int main()
 {
     // read image
@@ -56,10 +55,8 @@ int main()
     // CUDA prepare [d]evice frames
     uchar* d_pOriginalFrame;
     uchar* d_pFlippedFrame;
-
     cudaMalloc((void**)&d_pOriginalFrame, FRAME_SIZE * sizeof(uchar));
     cudaMalloc((void**)&d_pFlippedFrame,  FRAME_SIZE * sizeof(uchar));
-
     cudaMemcpy(d_pOriginalFrame, pFrame, FRAME_SIZE * sizeof(uchar), cudaMemcpyHostToDevice);
 
     // CUDA get [d]evice flipped frame
