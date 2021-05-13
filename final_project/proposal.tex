@@ -55,7 +55,7 @@ My project is to build a program that computes the co-efficients $a_k$'s and $b_
 \section{Method}
 To implement this DFT, $f$ will be represented as an array with $N$ elements, which is our input data. We compute $a_k$ as follow:
 \begin{equation}
-a_k = \frac{\innerproduct{f}{g_k}}{\innerproduct{g_k}{g_k}}.
+a_k = \frac{\innerproduct{f}{g_k}}{\innerproduct{g_k}{g_k}},
 \end{equation}
 where $\innerproduct{f}{g_k}$ denotes the inner product of two functions, and $\proposalFunc{g_k}{\integers}{\realnumbers}$ ($x \to g_k(x)$) denotes the corresponding function of $a_k$. For $k = 0$,
 \begin{equation}
