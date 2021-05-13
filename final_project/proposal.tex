@@ -1,0 +1,77 @@
+\documentclass[11pt, letterpaper, oneside]{article}
+\usepackage[affil-it]{authblk}
+\usepackage{mathtools}
+\usepackage{libertine} % acm font libertine
+
+\mathtoolsset{firstline-afterskip = 0pt}
+
+\newcommand
+{\realnumbers}
+{\mathbf{R}}
+
+\newcommand
+{\integers}
+{\mathbf{Z}}
+
+\newcommand
+{\proposalFunc}
+[3]
+{#1 \colon #2 \to #3}
+
+\newcommand
+{\innerproduct}
+[2]
+{\langle #1, #2 \rangle}
+
+\title{\textbf{Final Project Proposal}}
+\author{Tran Phong Binh\thanks{Student ID: 106590048}}
+\affil{Department of Computer Science and Information Technology,
+National Taipei University of Technology, Taipei}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section{Motivation}
+Recently I have been studying a linear algebra course by MIT Professor Gilbert Strang, and am intrigued to understand why the Discrete Fourier Transform (DFT) prefers complex exponential function to its real counterpart -- sine and cosine, even though they are analytically equivalent. I aim to use this final project to find it out.
+
+\section{Goal}
+My Fourier approximation is defined as:
+\begin{equation}
+    \begin{split}
+    f(x) & = \!
+        \begin{multlined}[t]
+        a_0 + a_1 cos(\frac{1}{N} 2\pi x) + b_1 sin(\frac{1}{N} 2\pi x) + \ldots\\
+        + a_{\frac{N - 1}{2}} cos(\frac{\frac{N-1}{2}}{N} 2\pi x) + b_{\frac{N-1}{2}} sin(\frac{\frac{N - 1}{2}}{N} 2\pi x)
+        \end{multlined}\\
+    & = a_0 + \sum_{k = 1}^{\frac{N - 1}{2}}{a_k cos(\frac{k}{N} 2\pi x) + b_k sin(\frac{k}{N} 2\pi x)},
+    \end{split}
+\end{equation}
+where $N$ is the number of input data; $x, k \in \integers$; $\proposalFunc{f}{[0, N - 1]}{\realnumbers}$ is the function that we want to approximate using $N$ orthogonal basis $\proposalFunc{sin, cos}{[0, 2\pi]}{\realnumbers}$; with $a_k, b_k \in \realnumbers$ being the co-efficients to be estimated. Here we assume that $N$ is odd (for $\frac{N - 1}{2} \in \integers$), and that $f$ is a periodic function with period $N$ (otherwise Fourier Transform is not theoretically correct).
+
+My project is to build a program that computes the co-efficients $a_k$'s and $b_k$'s above given $N$ input data. The algorithm involves only naive multiplications and additions. The goal is to compare the numerical result of this method and that of Fast Fourier Transform (FFT) which uses complex exponential function to see why the latter is favored in real-world applications.
+
+\section{Method}
+To implement this DFT, $f$ will be represented as an array with $N$ elements, which is our input data. We compute $a_k$ as follow:
+\begin{equation}
+a_k = \frac{\innerproduct{f}{g_k}}{\innerproduct{g_k}{g_k}}.
+\end{equation}
+where $\innerproduct{f}{g_k}$ denotes the inner product of two functions, and $\proposalFunc{g_k}{\integers}{\realnumbers}$ ($x \to g_k(x)$) denotes the corresponding function of $a_k$. For $k = 0$,
+\begin{equation}
+a_0 = \frac{\sum_{x = 0}^{N - 1}{f(x)} 1}{N} = \frac{1}{N} \sum_{x = 0}^{N - 1}{f(x)}.
+\end{equation}
+Otherwise,
+\begin{equation}
+a_k = \frac{\sum_{x = 0}^{N - 1}{f(x) cos(\frac{k}{N} 2\pi x)}}{\frac{N}{2}} = \frac{2}{N} \sum_{x = 0}^{N - 1}{f(x) cos(\frac{k}{N} 2\pi x)}.
+\end{equation}
+Similary, $b_k$ can be computed as
+\begin{equation}
+b_k = \frac{2}{N} \sum_{x = 0}^{N - 1}{f(x) sin(\frac{k}{N} 2\pi x)}.
+\end{equation}
+We are going to accelerate the algorithm by spawning $N$ threads computing each co-efficient independently. The arguments of each threads include the input array $f$ and the output array of co-efficients.
+
+\section{Expectation}
+The algorithm would have to deal with roughly $N \approx 50,000$ jobs, but I think it would work fine under 10 seconds. I also expect the numerical result not to differ much from that of FFT.
+
+\end{document}
