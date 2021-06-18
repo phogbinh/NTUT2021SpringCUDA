@@ -1,0 +1,120 @@
+\documentclass{beamer}
+\usepackage{xeCJK}
+\usepackage[backend=biber]{biblatex}
+
+\beamertemplatenavigationsymbolsempty
+\usetheme{Warsaw}
+\setCJKmainfont{ukai.ttc}
+\setCJKsansfont{ukai.ttc}
+\setCJKmonofont{ukai.ttc}
+\addbibresource{reference.bib}
+\setbeamertemplate{bibliography item}{\insertbiblabel}
+
+\renewcommand{\bibfont}{\tiny}
+
+\newcommand
+{\footnotelink}
+[1]
+{\footnote{\texttt{\scriptsize #1}}}
+
+\title{平行程式設計實務期末專題報告}
+\author{陳風平}
+\institute{國立台北科技大學　資訊工程系}
+\date{110年06月18日}
+
+\begin{document}
+
+\begin{frame}
+    \titlepage
+\end{frame}
+
+\begin{frame}
+    \frametitle{目錄}
+    \tableofcontents
+\end{frame}
+
+\section{研究目的}
+\begin{frame}
+    \frametitle{研究目的}
+    \begin{itemize}
+        \item 加速本人類神經網路 MATLAB 專案\footnotelink{https://github.com/phogbinh/handwritten-digit-recognition}（一下簡稱本專案）。
+        \item 學習如何加速類神經網路訓練。
+        \item 學習 MATLAB 平行與 GPU 函式庫。
+    \end{itemize}
+\end{frame}
+
+\section{研究過程}
+\begin{frame}
+    \frametitle{第一階段：探索}
+    \begin{itemize}
+        \item 參考 Block Multiplication 加速方法\cite{blockmul}。
+        \item 參考 \cite{imagenet} -- 用 C++/CUDA 在 GPU 做 convolution 的計算\footnotelink{https://code.google.com/archive/p/cuda-convnet}。% "We wrote a highly-optimized GPU implementation of 2D convolution and all the other operations inherent in training convolutional neural networks, which we make available publicly"
+        \item 學習 MATLAB 平行與 GPU 計算教學系列\cite{partut}。
+    \end{itemize}
+\end{frame}
+
+\begin{frame}
+    \frametitle{第二階段：初步啟發}
+    \begin{itemize}
+        \item 整理原本程式碼 -- 類別、函式、命名等。
+        \item Brainstorm 加速方法與問題（第 \ref{methods} 頁）。
+        \item 決定專題策略：從實驗啟發。
+     \end{itemize}
+\end{frame}
+
+\begin{frame}[label={methods}]
+    \frametitle{第二階段：加速方法與問題}
+        \begin{table}
+        \centering
+        \begin{tabular}{ p{0.3\textwidth} p{0.5\textwidth} }
+            方法 & 問題 \\
+            \hline
+            把全部資料搬到 GPU 做計算 & 本專案最大矩陣為 $w^{2}_{47 \times 784}$，無法利用 GPU 矩陣相乘加速\cite{gpublog}\newline \\
+            寫 C++ single precision 矩陣相乘 link 到 MATLAB 加速 & MATLAB 本身 BLAS 矩陣相乘已 highly-optimized\cite{matrixmulforum, matlabannounce}，要花出很多功夫才能跟它速度相比\newline \\
+            用 C++ 重寫本專案 & 要處理龐大資料儲存在記憶體裡面，要研究 C++ 線性代數圖書庫（如 Eigen3、GMTL 等\cite{stackoverflow}）
+        \end{tabular}
+    \end{table}
+\end{frame}
+
+\begin{frame}
+    \frametitle{第三階段：實驗}
+    \begin{itemize}
+        \item 使用 MATLAB Profiler 查看程式瓶頸\cite{profilervid}。
+        \item 參考 MATLAB 提升效率建議\cite{matlabimprove}。
+        \item 標註本專案可改做平行的部分\footnotelink{https://phogbinh.github.io/handwritten-digit-recognition/train\_fast.m}。
+    \end{itemize}
+\end{frame}
+
+\begin{frame}
+    \frametitle{第三階段：實驗結果}
+    \begin{table}
+        \centering
+        \begin{tabular}{ p{0.55\textwidth} p{0.25\textwidth} }
+            方法 & 加速時間（妙） \\
+            \hline
+            把 \texttt{layer} 屬性改變數，解開迴圈\newline & 250 \\
+            把 \texttt{layer\_associates} 屬性改變數\newline & 150 \\
+            在每個 mini-batch 用 \texttt{parfor} 平行\newline & 失敗\footnote{跑了 25 分鐘還沒訓練完成。} \\
+            重用已配置記憶體的變數\cite{zeroforum}\newline & 1 \\
+            取代全部全域變數\newline & 50 \\
+            把全部資料搬到 GPU 做計算\newline & 失敗\footnote{跑了 40 分鐘還沒訓練完成。} \\
+        \end{tabular}
+    \end{table}
+\end{frame}
+
+\section{研究成果}
+\begin{frame}
+    \frametitle{研究成果}
+    \begin{itemize}
+        \item Demo 完整版\footnotelink{https://youtu.be/a7IcN0bq5Z8}。
+        \item 成功把本專案加速了兩倍（原 911.8774 秒變 457.9892 秒）。 
+        \item 觀察到 MATLAB 本身有 multi-threading（原 CPU 使用率 39\% 變 60\%）。
+    \end{itemize}
+\end{frame}
+
+\begin{frame}
+    \frametitle{參考文獻}
+    \printbibliography[heading=none]
+\end{frame}
+
+\end{document}
