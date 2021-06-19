@@ -31,23 +31,21 @@
 \tableofcontents
 
 \chapter{研究動機}
-近期的深度學習，不管是在學術界還是工業界，都是熱度頗高的技術之一。而大多數的深度學習模型都使用 NVidia 的 GPU，早就已經不拿 CPU 來做訓練了。
+近期的深度學習，不管是在學術界還是工業界，都是熱度頗高的技術之一。而大多數的深度學習模型都是用 NVidia 的 GPU，早就不拿 CPU 來做計算了。
 
-剛好我去年有自己寫出一份辨識手寫數字達 97\% 精準度的類神經網路模型\footnotelink{https://github.com/phogbinh/handwritten-digit-recognition}（一下簡稱本專案\footnote{本專案為單純使用矩陣乘法、無用任何其他外掛的 MATLAB 專案。}）。但那時候每次在 CPU 執行都要花接近半個小時（訓練與測試），造成我研究上的困擾。因此，我想針對這次平行程式設計實務期末專題（一下簡稱本專題）應用 CUDA 來加速此模型。
+剛好我去年有自己寫出一份辨識手寫數字達 97\% 準確率的類神經網路模型\footnotelink{https://github.com/phogbinh/handwritten-digit-recognition}（以下簡稱本專案\footnote{本專案為單純矩陣乘法、無用任何其他外掛的 MATLAB 專案}）。但那時候每次在 CPU 執行都要花接近半個小時的時間（訓練與測試），造成本人研究上的困擾。因此，我想針對這次平行程式設計實務期末專題（以下簡稱本專題）應用 CUDA 來加速此程式。
 
 \chapter{研究目的}
-我真正的目的為研究電腦科學家如何加速類神經網路。
-
-因此，我打算先自己想如何優化本專案，再去參考他人的方法。最後，我會選出一個實作又簡單、效果又不錯的方法來改進我的機器學習模型。這樣我不只學會他人的方法，也能接觸 MATLAB 平行與 GPU 函式庫，對我未來上碩士做學術研究有非常大的幫助。
+我真正的目的為研究電腦科學家如何加速類神經網路。因此，我打算先自己思考如何優化本專案，再去參考他人的方法。最後，我會挑出一個實作又簡單、效果又不錯的方法來改進我的機器學習模型。這樣我不只學會他人的方法，也能接觸 MATLAB 平行與 GPU 的函式庫，對我接下來上碩士做學術研究有非常大的幫助。
 
 \chapter{平行方法}
-如本專案簡報的研究過程\footnotelink{https://phogbinh.github.io/NTUT2021SpringCUDA/final\_project/presentation/presentation.pdf}指出，此類神經網路無法做平行計算。我會在此章節帶過該簡報的重點。
+如本專案簡報的研究過程\footnotelink{https://phogbinh.github.io/NTUT2021SpringCUDA/final\_project/presentation/presentation.pdf}已經指出，此類神經網路無法做平行計算。我會在此章節帶過該簡報的重點。
 
 \section{問題}
 下方表格為本專案加速方法與問題：
 \begin{table}[h!]
     \centering
-    \begin{tabular}{ p{0.3\textwidth} p{0.5\textwidth} }
+    \begin{tabular}{ p{0.4\textwidth} p{0.5\textwidth} }
         方法 & 問題 \\
         \hline
         把全部資料搬到 GPU 做計算 & 本專案最大矩陣為 $w^{2}_{47 \times 784}$，無法利用 GPU 矩陣相乘加速\cite{gpublog}\newline \\
@@ -66,19 +64,19 @@
         \hline
         把 \texttt{layer} 屬性改變數，解開迴圈\newline & 250 \\
         把 \texttt{layer\_associates} 屬性改變數\newline & 150 \\
-        在每個 mini-batch 用 \texttt{parfor} 平行\newline & 失敗\footnote{跑了 25 分鐘還沒訓練完成。} \\
+        在每個 mini-batch 用 \texttt{parfor} 平行 & 失敗（跑了 25 分鐘還沒訓練完成）\newline \\
         重用已配置記憶體的變數\cite{zeroforum}\newline & 1 \\
         取代全部全域變數\newline & 50 \\
-        把全部資料搬到 GPU 做計算\newline & 失敗\footnote{跑了 40 分鐘還沒訓練完成。} \\
+        把全部資料搬到 GPU 做計算 & 失敗（跑了 40 分鐘還沒訓練完成）\newline \\
     \end{tabular}
     \caption{實驗結果}
 \end{table}
 
 \chapter{研究成果}
-我成功地把本專案模型訓練的部分加速了兩倍（原 911.8774 秒變 457.9892 秒\footnotelink{https://youtu.be/a7IcN0bq5Z8}） -- 達標 proposal 預期結果。
+我成功地把本專案模型訓練的部分加速了兩倍（原 911.8774 秒變 457.9892 秒\footnotelink{https://youtu.be/a7IcN0bq5Z8}） -- 達標原本 proposal 提出的預期結果。
 
 \chapter{結論心得}
-透過本專題，我不只學會了 GPU 在類神經網路加速龐大矩陣乘法的用途，也上手了 MATLAB 平行與 GPU 函式庫。另外，我也順便學習到如何使用 \LaTeX 的 beamer 套件做簡報，非常有成就感。
+透過本專題，我不只學會了 GPU 在類神經網路加速龐大矩陣乘法的用途，也上手了 MATLAB 平行與 GPU 的函式庫。另外，我也順便學習到如何使用 \LaTeX 的 beamer 套件做一份學術簡報，非常有成就感！
 
 \printbibliography
 
